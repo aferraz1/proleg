@@ -137,7 +137,7 @@ class TipoTelefone(TimeStamped):
 
 
 class TipoEndereco(TimeStamped):
-    sigla = models.CharField(max_length=3)
+    sigla = models.CharField(max_length=3, unique=True)
     nome = models.CharField(max_length=150)
     descricao = models.TextField(blank=True)
     imagem = models.ImageField(upload_to="tipos_endereco/imagens/", blank=True)
