@@ -182,15 +182,15 @@ class Endereco(TimeStamped):
         return f"{self.logradouro}, {self.numero} - {self.municipio.nome}"
 
 
-COUNTRY_CHOICES = [
-    ("BR", "+55 Brasil"),
-    ("US", "+1 Estados Unidos"),
-]
-
-
 class Telefone(TimeStamped):
+    class Country(models.TextChoices):
+        BRAZIL = "BR", "+55 Brasil"
+        UNITED_STATES = "US", "+1 Estados Unidos"
+
     tipo = models.ManyToManyField(TipoTelefone, related_name="telefones")
-    pais = models.CharField(max_length=2, choices=COUNTRY_CHOICES, default="BR")
+    pais = models.CharField(
+        max_length=2, choices=Country.choices, default=Country.BRAZIL
+    )
     numero = models.CharField(max_length=15)
     ramal = models.CharField(max_length=15, blank=True)
 
