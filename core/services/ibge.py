@@ -54,6 +54,10 @@ def get_regioes(
     """Return all regions or a single region when ``regiao_id`` is provided."""
 
     endpoint = f"regioes/{regiao_id}" if regiao_id else "regioes"
+    params = {
+        "orderBy": "nome",
+        "view": "nivelado"
+    }
     return _request(endpoint, params=params, **request_kwargs)
 
 
@@ -75,6 +79,10 @@ def get_estados(
         endpoint = f"regioes/{regiao_id}/estados"
     else:
         endpoint = "estados"
+    params = {
+        "orderBy": "nome",
+        "view": "nivelado"
+    }
     return _request(endpoint, params=params, **request_kwargs)
 
 
@@ -101,6 +109,10 @@ def get_municipios(
         endpoint = f"estados/{estado_id}/municipios"
     else:
         endpoint = "municipios"
+    params = {
+        "orderBy": "nome",
+        "view": "nivelado"
+    }
     return _request(endpoint, params=params, **request_kwargs)
 
 
