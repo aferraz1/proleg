@@ -54,10 +54,7 @@ def get_regioes(
     """Return all regions or a single region when ``regiao_id`` is provided."""
 
     endpoint = f"regioes/{regiao_id}" if regiao_id else "regioes"
-    params = {
-        "orderBy": "nome",
-        "view": "nivelado"
-    }
+    params = {"orderBy": "nome", **(params or {})}
     return _request(endpoint, params=params, **request_kwargs)
 
 
@@ -79,10 +76,7 @@ def get_estados(
         endpoint = f"regioes/{regiao_id}/estados"
     else:
         endpoint = "estados"
-    params = {
-        "orderBy": "nome",
-        "view": "nivelado"
-    }
+    params = {"orderBy": "nome", **(params or {})}
     return _request(endpoint, params=params, **request_kwargs)
 
 
@@ -109,10 +103,7 @@ def get_municipios(
         endpoint = f"estados/{estado_id}/municipios"
     else:
         endpoint = "municipios"
-    params = {
-        "orderBy": "nome",
-        "view": "nivelado"
-    }
+    params = {"orderBy": "nome", **(params or {})}
     return _request(endpoint, params=params, **request_kwargs)
 
 
@@ -120,20 +111,24 @@ def get_municipios(
 
 def _ensure_regiao(data: Dict[str, Any]) -> Regiao:
     """Create or update a :class:`Regiao` from API payload."""
-
+    regiao_id = data.get("id")
+    if regiao_id is None:
+        raise KeyError("Missing 'id' in region payload")
     return Regiao.objects.update_or_create(
-        id=data["id"],
+        id=regiao_id,
         defaults={"sigla": data.get("sigla", ""), "nome": data.get("nome", "")},
     )[0]
 
 
 def _ensure_estado(data: Dict[str, Any]) -> Estado:
     """Create or update an :class:`Estado` and its related region."""
-
+    estado_id = data.get("id")
+    if estado_id is None:
+        raise KeyError("Missing 'id' in state payload")
     regiao_data = data.get("regiao")
     regiao = _ensure_regiao(regiao_data) if regiao_data else None
     return Estado.objects.update_or_create(
-        id=data["id"],
+        id=estado_id,
         defaults={
             "sigla": data.get("sigla", ""),
             "nome": data.get("nome", ""),
@@ -144,7 +139,9 @@ def _ensure_estado(data: Dict[str, Any]) -> Estado:
 
 def _ensure_municipio(data: Dict[str, Any]) -> Municipio:
     """Create or update a :class:`Municipio` and ensure its state exists."""
-
+    municipio_id = data.get("id")
+    if municipio_id is None:
+        raise KeyError("Missing 'id' in municipality payload")
     uf = (
         data.get("microrregiao", {})
         .get("mesorregiao", {})
@@ -155,7 +152,7 @@ def _ensure_municipio(data: Dict[str, Any]) -> Municipio:
     )
     estado = _ensure_estado(uf) if uf else None
     return Municipio.objects.update_or_create(
-        id=data["id"],
+        id=municipio_id,
         defaults={"nome": data.get("nome", ""), "estado": estado},
     )[0]
 
